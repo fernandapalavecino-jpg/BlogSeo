@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Blog Leads — Assetplan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:2rem}
+.container{max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{font-size:13px;color:#666;margin-bottom:1.5rem}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px}
+.bb{background:#E6F1FB;color:#0C447C}.bt{background:#E1F5EE;color:#085041}
+select{font-size:14px;padding:6px 14px;border-radius:8px;border:1px solid #ddd;background:white;color:#1a1a1a;cursor:pointer;margin-left:auto}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.metric{background:#f0ede6;border-radius:8px;padding:1rem}
+.ml{font-size:12px;color:#666;margin-bottom:6px}
+.mv{font-size:28px;font-weight:500}
+.ms{font-size:12px;color:#999;margin-top:4px}
+.charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:1.5rem}
+.card{background:white;border:1px solid #eee;border-radius:12px;padding:1rem 1.25rem}
+.ct{font-size:13px;font-weight:500;color:#666;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-size:11px;font-weight:500;color:#999;text-align:left;padding-bottom:8px;border-bottom:1px solid #eee}
+td{padding:8px 0;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.pill-mql{background:#E6F1FB;color:#0C447C}
+.pill-sql{background:#E1F5EE;color:#085041;margin-left:4px}
+.footer{font-size:12px;color:#999;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee}
+</style>
+</head><body><div class="container">
+
+<h1>Blog Leads — Assetplan</h1>
+<p class="sub">HubSpot organic/blog · Actualizado: 2026-04-08 20:36</p>
+
+<div class="topbar">
+  <span class="badge bb">MQL = todos los contactos del blog</span>
+  <span class="badge bt">SQL = Calificados por ventas</span>
+  <select id="monthFilter" onchange="updateDashboard()">
+    <option value="all">Todo 2026</option><option value="2026-01" >Enero 2026</option><option value="2026-02" >Febrero 2026</option><option value="2026-03" >Marzo 2026</option><option value="2026-04" selected>Abril 2026</option>
+  </select>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="ml">MQLs</div><div class="mv" id="stat-mql">—</div><div class="ms" id="stat-mql-sub">—</div></div>
+  <div class="metric"><div class="ml">SQLs</div><div class="mv" id="stat-sql">—</div><div class="ms">calificados por ventas</div></div>
+  <div class="metric"><div class="ml">Tasa conversión</div><div class="mv" id="stat-rate">—</div><div class="ms">MQL → SQL</div></div>
+  <div class="metric"><div class="ml">Período</div><div class="mv" id="stat-period">—</div><div class="ms" id="stat-period-sub">—</div></div>
+</div>
+
+<div class="charts">
+  <div class="card">
+    <div class="ct" id="chart-title">MQLs y SQLs</div>
+    <div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px;color:#666">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#B5D4F4;display:inline-block"></span>MQL</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#5DCAA5;display:inline-block"></span>SQL</span>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="mc"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">Conversión MQL → SQL</div>
+    <div style="position:relative;height:180px"><canvas id="dc"></canvas></div>
+    <div style="text-align:center;margin-top:8px;font-size:13px;color:#666" id="donut-label">—</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ct">Contactos del blog</div>
+  <table>
+    <thead><tr><th>Nombre</th><th>Email</th><th>Fecha</th><th>Etapa</th></tr></thead>
+    <tbody id="contactTable"></tbody>
+  </table>
+</div>
+
+<div class="footer">Generado: 2026-04-08 20:36 · Corre el script para actualizar · HubSpot organic/blog</div>
+</div>
+
+<script>
+const ALL_ROWS = [{"fecha": "2026-04-08", "nombre": "Prueba 8 abril", "email": "prueba8abril@somosforma.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-04-06", "nombre": "Maritza Sanhueza", "email": "secplamary@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-03-26", "nombre": "matias rojas", "email": "legalpridechile@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-03-25", "nombre": "Tamara Piña", "email": "tamara.pina.fajardo@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-03-15", "nombre": "Red Faundez Reader Faundez", "email": "rfaundez1981@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-03-06", "nombre": "Maria teresa", "email": "mariateresamolinalopez@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-02-26", "nombre": "a", "email": "iywwflji@sharklasers.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-02-23", "nombre": "Paula Maturana", "email": "paulamaturanagallardo@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-02-20", "nombre": "Karla  Acevedo Olmedo", "email": "karlaacevedo247@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-02-19", "nombre": "Madelein  Doepking", "email": "mdoepking979@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-02-18", "nombre": "Miguel Rojas", "email": "rojasoterom@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-01-30", "nombre": "Edgardo  Villalobos", "email": "edgardoivillalobosc@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-01-28", "nombre": "Constanza  Saavedra Donoso", "email": "coni.saavedra@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-01-21", "nombre": "Josefina  Davico", "email": "mjosefinadavicom@gmail.com", "status": "", "etapa": "MQL"}, {"fecha": "2026-01-14", "nombre": "a", "email": "aa@aa.cl", "status": "", "etapa": "MQL"}];
+const MESES_ES = {"01":"Ene","02":"Feb","03":"Mar","04":"Abr","05":"May","06":"Jun","07":"Jul","08":"Ago","09":"Sep","10":"Oct","11":"Nov","12":"Dic"};
+let barChart, donutChart;
+
+function mesLabel(key) {
+  if (!key || key.length < 7) return key;
+  const [y, m] = key.split("-");
+  return (MESES_ES[m] || m) + " " + y;
+}
+
+function updateDashboard() {
+  const filter = document.getElementById('monthFilter').value;
+  const rows = filter === 'all' ? ALL_ROWS : ALL_ROWS.filter(r => r.fecha && r.fecha.startsWith(filter));
+
+  const mqls = rows.length;
+  const sqls = rows.filter(r => r.etapa === 'SQL').length;
+  const rate = mqls > 0 ? Math.round((sqls/mqls)*1000)/10 : 0;
+
+  document.getElementById('stat-mql').textContent = mqls;
+  document.getElementById('stat-sql').textContent = sqls;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  document.getElementById('stat-mql-sub').textContent = filter === 'all' ? 'acumulado 2026' : mesLabel(filter);
+  document.getElementById('donut-label').textContent = rate + '% conversión';
+
+  if (filter === 'all') {
+    document.getElementById('stat-period').textContent = '2026';
+    document.getElementById('stat-period-sub').textContent = 'año completo';
+    document.getElementById('chart-title').textContent = 'MQLs y SQLs por mes — 2026';
+    renderBarByMonth(rows);
+  } else {
+    const sem = getWeekNum(filter);
+    document.getElementById('stat-period').textContent = mesLabel(filter);
+    document.getElementById('stat-period-sub').textContent = sem + ' semanas';
+    document.getElementById('chart-title').textContent = 'MQLs y SQLs por semana — ' + mesLabel(filter);
+    renderBarByWeek(rows, filter);
+  }
+
+  renderDonut(mqls, sqls);
+  renderTable(rows);
+}
+
+function getWeekNum(monthKey) {
+  const rows = ALL_ROWS.filter(r => r.fecha && r.fecha.startsWith(monthKey));
+  const weeks = new Set(rows.map(r => {
+    const d = new Date(r.fecha);
+    const first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+    return Math.ceil((d.getDate() + first) / 7);
+  }));
+  return weeks.size;
+}
+
+function groupBy(rows, keyFn) {
+  const map = {};
+  rows.forEach(r => {
+    const k = keyFn(r);
+    if (!map[k]) map[k] = {mql:0, sql:0};
+    map[k].mql++;
+    if (r.etapa === 'SQL') map[k].sql++;
+  });
+  return map;
+}
+
+function renderBarByMonth(rows) {
+  const grouped = groupBy(rows, r => r.fecha ? r.fecha.slice(0,7) : 'sin-fecha');
+  const keys = Object.keys(grouped).sort();
+  renderBar(keys.map(k => mesLabel(k)), keys.map(k => grouped[k].mql), keys.map(k => grouped[k].sql));
+}
+
+function renderBarByWeek(rows, monthKey) {
+  const grouped = groupBy(rows, r => {
+    if (!r.fecha) return 'S?';
+    const d = new Date(r.fecha);
+    const first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+    return 'S' + Math.ceil((d.getDate() + first) / 7);
+  });
+  const keys = Object.keys(grouped).sort();
+  renderBar(keys, keys.map(k => grouped[k].mql), keys.map(k => grouped[k].sql));
+}
+
+function renderBar(labels, mqlData, sqlData) {
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('mc'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {label:'MQL', data:mqlData, backgroundColor:'#B5D4F4', borderRadius:4},
+        {label:'SQL', data:sqlData, backgroundColor:'#5DCAA5', borderRadius:4}
+      ]
+    },
+    options: {responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}}, y:{ticks:{stepSize:1}}}
+    }
+  });
+}
+
+function renderDonut(mqls, sqls) {
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('dc'), {
+    type: 'doughnut',
+    data: {
+      labels: ['SQL', 'Solo MQL'],
+      datasets: [{data:[sqls, Math.max(0, mqls-sqls)], backgroundColor:['#5DCAA5','#B5D4F4'], borderWidth:0}]
+    },
+    options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'65%'}
+  });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('contactTable');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:1rem 0;color:#999">Sin contactos para este período.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.slice(0,15).map(r => `
+    <tr>
+      <td style="font-weight:500">${r.nombre}</td>
+      <td style="color:#666;font-size:12px">${r.email}</td>
+      <td style="color:#666">${r.fecha || '—'}</td>
+      <td>
+        <span class="pill pill-mql">MQL</span>
+        ${r.etapa === 'SQL' ? '<span class="pill pill-sql">SQL</span>' : ''}
+      </td>
+    </tr>`).join('');
+}
+
+updateDashboard();
+</script>
+</body></html>
